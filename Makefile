@@ -19,9 +19,36 @@ endif
 # test:
 # 	go test -v -cover ./...
 
-## migrate
+## run graphql 
+run-graphql:
+	go run ./graphql/cmd
+
+## migrate rest schema
+graphql-migrate:
+	atlas schema apply --url "$(DATABASE_URL)" --dev-url "$(DEV_URL)" --to "file://./graphql/internal/repository/sql/schema.sql"
+
+## generate graphql repository
+graphql-generate-repository:
+	cd graphql/internal && sqlc generate
+
+## generate graphql code
+graphql-generate-graphql:
+	cd graphql/internal && go tool gqlgen generate
+
+## ----
+
+## run rest
+run-rest:
+	go run ./rest/cmd
+
+## migrate rest schema
 rest-migrate:
 	atlas schema apply --url "$(DATABASE_URL)" --dev-url "$(DEV_URL)" --to "file://./rest/internal/repository/sql/schema.sql"
+
+## generate rest repository
+rest-generate:
+	cd rest/internal && sqlc generate
+
 ## tidy: Format code and clean up dependencies
 tidy:
 	go fmt ./...
