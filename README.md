@@ -1,7 +1,7 @@
 <p align="center">
     <img src="public/go.png" alt="Go" height="80" />
     <img src="public/graphql.png" alt="GraphQL" height="80" />
-    <img src="public/sqlc.png" alt="sqlc" height="80" />
+    <img src="public/sqlc.png" alt="sqlc" height="60" />
 </p>
 <p align="center">Collection of Go backend servers paired with various tools and frameworks</p>
 
@@ -11,12 +11,12 @@ This repository contains Collection of servers built in Go with different framew
 
 The following tools/frameworks are used in this project:
 
-| Tool/Framework | Description |
-|----------------|-------------|
-| **GraphQL** | Implements a GraphQL API layer implemented using gqlgen (schema-first code generation for resolvers and models). |
-| **sqlc** | The sqlc compiler generates type-safe Go code from raw SQL queries → implements a clean **repository pattern** for the data layer. |
-| **Atlas** | Declarative schema migrations using Atlas. |
-| **net/http** | Implements go's net/http standard lib for advanced routing, middleware, and REST endpoint grouping. |
+| Tool/Framework | Description                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **GraphQL**    | Implements a GraphQL API layer implemented using gqlgen (schema-first code generation for resolvers and models).                   |
+| **sqlc**       | The sqlc compiler generates type-safe Go code from raw SQL queries → implements a clean **repository pattern** for the data layer. |
+| **Atlas**      | Declarative schema migrations using Atlas.                                                                                         |
+| **net/http**   | Implements go's net/http standard lib for advanced routing, middleware, and REST endpoint grouping.                                |
 
 ## Development Notes
 
@@ -35,7 +35,7 @@ The following tools/frameworks are used in this project:
 
 ```graphql
 mutation createUser {
-  createUser (input: {id: "id1", name: "John"}){
+  createUser(input: { id: "id1", name: "John" }) {
     name
   }
 }
@@ -46,7 +46,7 @@ mutation createUser {
 ```graphql
 query getUsers {
   users {
-    id,
+    id
     name
   }
 }
@@ -56,8 +56,10 @@ query getUsers {
 
 ```graphql
 mutation createTodo {
-  createTodo (input: {id: "todoid1", text: "First todo from John", userId: "id1"}) {
-    text,
+  createTodo(
+    input: { id: "todoid1", text: "First todo from John", userId: "id1" }
+  ) {
+    text
     done
   }
 }
@@ -68,11 +70,11 @@ mutation createTodo {
 ```graphql
 query getTodos {
   todos {
-    id,
-    text,
-    done,
+    id
+    text
+    done
     user {
-      id,
+      id
       name
     }
   }
