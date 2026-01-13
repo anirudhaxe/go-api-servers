@@ -2,11 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/anirudhaxe/go-api-servers/rest/internal/model"
 	"github.com/anirudhaxe/go-api-servers/rest/internal/service"
+	"github.com/anirudhaxe/go-api-servers/rest/utils"
 )
 
 // handler is basically the controller, includes business logic
@@ -19,30 +20,35 @@ func NewProductHandler(service *service.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
-func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) error {
 	var product model.Product
 
 	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
-		return
+
+		return fmt.Errorf("Invalid input")
+
 	}
 
-	if err := h.service.AddProduct(&product); err != nil {
-		http.Error(w, err.Error(), http.StatusConflict)
-		return
+	if err := h.service.CreateProduct(&product); err != nil {
+		return fmt.Errorf("Error while creating product: %s", err.Error())
 	}
 
 	w.WriteHeader(http.StatusCreated)
 
+	return nil
+
 }
 
-func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) error {
 
-	log.Println("GET ALL PRODUCT handler hit")
-	products := h.service.ListProducts()
+	products, err := h.service.ListProducts()
 
-	w.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		return fmt.Errorf("Error while getting products: %s", err.Error())
+	}
 
-	json.NewEncoder(w).Encode(products)
+	utils.WriteJSON(w, http.StatusOK, products)
+
+	return nil
 
 }
