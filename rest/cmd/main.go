@@ -30,9 +30,10 @@ func main() {
 
 	m := http.NewServeMux()
 
-	productRoutes := router.RegisterProductRoutes(ctx, db)
+	userRoutes := router.RegisterUserRoutes(ctx, db)
 
-	m.Handle("/api/v1/product", productRoutes)
+	m.Handle("/api/v1/user", userRoutes)
+	m.Handle("/api/v1/user/", userRoutes)
 
 	log.Println("REST SERVER RUNNING ON: 3000")
 	http.ListenAndServe(":3000", m)
