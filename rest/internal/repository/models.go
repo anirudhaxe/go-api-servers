@@ -5,12 +5,146 @@
 package repository
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Product struct {
-	ID          string
-	Name        string
-	Description pgtype.Text
-	Price       pgtype.Float8
+type SessionStatus string
+
+const (
+	SessionStatusPending   SessionStatus = "pending"
+	SessionStatusRunning   SessionStatus = "running"
+	SessionStatusCompleted SessionStatus = "completed"
+	SessionStatusFailed    SessionStatus = "failed"
+	SessionStatusCancelled SessionStatus = "cancelled"
+	SessionStatusTimeout   SessionStatus = "timeout"
+)
+
+func (e *SessionStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = SessionStatus(s)
+	case string:
+		*e = SessionStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for SessionStatus: %T", src)
+	}
+	return nil
+}
+
+type NullSessionStatus struct {
+	SessionStatus SessionStatus
+	Valid         bool // Valid is true if SessionStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullSessionStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.SessionStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.SessionStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullSessionStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.SessionStatus), nil
+}
+
+type UserRole string
+
+const (
+	UserRoleAdmin UserRole = "admin"
+	UserRoleUser  UserRole = "user"
+)
+
+func (e *UserRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserRole(s)
+	case string:
+		*e = UserRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserRole: %T", src)
+	}
+	return nil
+}
+
+type NullUserRole struct {
+	UserRole UserRole
+	Valid    bool // Valid is true if UserRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserRole), nil
+}
+
+type AiAgent struct {
+	ID              pgtype.UUID
+	Name            string
+	ModelType       string
+	Provider        string
+	Specialization  pgtype.Text
+	Description     pgtype.Text
+	ContextWindow   pgtype.Int4
+	TotalTokensUsed int64
+	IsAvailable     bool
+	CreatedAt       pgtype.Timestamp
+}
+
+type ComputeNode struct {
+	ID           pgtype.UUID
+	Name         string
+	Provider     string
+	GpuModelCode pgtype.Text
+	GpuCount     int32
+	GpuMemoryGb  pgtype.Numeric
+	PricePerHour pgtype.Numeric
+	IsOnline     bool
+	CreatedAt    pgtype.Timestamp
+}
+
+type Session struct {
+	ID            pgtype.UUID
+	UserID        pgtype.UUID
+	AgentID       pgtype.UUID
+	ComputeNodeID pgtype.UUID
+	Status        SessionStatus
+	TokensUsed    int64
+	RetryCount    int32
+	TimeElapsedMs int64
+	StartedAt     pgtype.Timestamp
+	EndedAt       pgtype.Timestamp
+	CreatedAt     pgtype.Timestamp
+}
+
+type User struct {
+	ID                pgtype.UUID
+	Username          string
+	Email             string
+	EncryptedPassword string
+	Role              UserRole
+	IsActive          bool
+	CreatedAt         pgtype.Timestamp
+	LastLoginAt       pgtype.Timestamp
 }
