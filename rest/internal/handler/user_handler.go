@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/anirudhaxe/go-api-servers/rest/internal/model"
+	"github.com/anirudhaxe/go-api-servers/rest/internal/repository"
 	"github.com/anirudhaxe/go-api-servers/rest/internal/service"
 	"github.com/anirudhaxe/go-api-servers/rest/utils"
 )
@@ -21,6 +22,23 @@ func NewUserHandler(service *service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) error {
+
+	val, ok := r.Context().Value("usrEmail").(string)
+
+	if !ok {
+		return fmt.Errorf("Error while authorizing user")
+	}
+
+	reqUsr, err := h.service.GetUser(val)
+
+	if err != nil {
+		return fmt.Errorf("Error while authorizing user")
+	}
+
+	if reqUsr.Role != repository.UserRoleAdmin {
+		return fmt.Errorf("Error while authorizing user: only admins can register new users.")
+	}
+
 	var request model.RegisterUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {

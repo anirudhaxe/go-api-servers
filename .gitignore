@@ -1,1 +1,8 @@
+# env
 .env
+.env.production
+
+# misc
+.DS_Store
+pg_storage
+

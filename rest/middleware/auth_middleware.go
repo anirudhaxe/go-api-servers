@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -30,7 +31,9 @@ func WithJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		claims := token.Claims.(jwt.MapClaims)
 		fmt.Println(claims["email"])
 
-		// TODO: Can perform authentication match here by matching this claim email with second email in header (need to verify the existence of this email in the db as well). Alternatively, add this information to a context to then access it in the handlers
+		ctx := context.WithValue(r.Context(), "usrEmail", claims["email"])
+
+		r = r.WithContext(ctx)
 
 		handlerFunc(w, r)
 
